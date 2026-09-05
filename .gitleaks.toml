@@ -1,0 +1,13 @@
+# Gitleaks policy for blog-post. Extends the default rule set and allowlists
+# only our documented placeholders — never real credential shapes.
+title = "blog-post secret policy"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "placeholder and example credentials — not real secrets"
+regexes = [
+  '''change-me''',
+  '''example\.com''',
+]

@@ -45,3 +45,6 @@ next-env.d.ts
 /tasks/
 /docs/
 /.agents/
+
+# Payload local uploads — a named volume on the VPS, never in git
+/media/
