@@ -1,6 +1,18 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 
+export type Cover = {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export type PostDetail = Post & {
+  body: unknown;
+  cover: Cover | null;
+};
+
 export type Post = {
   slug: string;
   title: string;
@@ -94,6 +106,67 @@ export async function getLatestPosts(limit = 10): Promise<Post[]> {
     }
   }
   return posts;
+}
+
+function asNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function toCover(value: unknown): Cover | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const url = asString(value.url);
+  const width = asNumber(value.width);
+  const height = asNumber(value.height);
+  if (!url || !width || !height) {
+    return null;
+  }
+  const alt = asString(value.alt) ?? "";
+  return { url, alt, width, height };
+}
+
+function toBody(value: unknown): unknown {
+  if (!isRecord(value) || !isRecord(value.root) || !Array.isArray(value.root.children)) {
+    return null;
+  }
+  return value;
+}
+
+export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
+  const payload = await getPayload({ config });
+  const result = (await payload.find({
+    collection: "posts",
+    where: { slug: { equals: slug } },
+    limit: 1,
+  })) as unknown as { docs?: unknown };
+  const docs = Array.isArray(result.docs) ? result.docs : [];
+  const first = docs.length > 0 ? docs[0] : null;
+  const post = toPost(first);
+  if (!post || !isRecord(first)) {
+    return null;
+  }
+  return { ...post, body: toBody(first.body), cover: toCover(first.cover) };
+}
+
+export async function getPublishedSlugs(): Promise<string[]> {
+  const payload = await getPayload({ config });
+  const result = (await payload.find({
+    collection: "posts",
+    where: { _status: { equals: "published" } },
+    limit: 100,
+  })) as unknown as { docs?: unknown };
+  const docs = Array.isArray(result.docs) ? result.docs : [];
+  const slugs: string[] = [];
+  for (const doc of docs) {
+    if (isRecord(doc)) {
+      const slug = asString(doc.slug);
+      if (slug) {
+        slugs.push(slug);
+      }
+    }
+  }
+  return slugs;
 }
 
 export async function getLatestProjects(limit = 10): Promise<Project[]> {
