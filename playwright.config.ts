@@ -6,7 +6,7 @@ export default defineConfig({
   use: { baseURL: "http://localhost:3000" },
   webServer: {
     command: "pnpm dev --port 3000",
-    url: "http://localhost:3000",
+    url: "http://localhost:3000/play",
     reuseExistingServer: true,
     timeout: 120_000,
   },

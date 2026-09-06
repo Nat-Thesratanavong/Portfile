@@ -15,6 +15,9 @@ export function Footer() {
           <a href={`mailto:${site.email}`} className="transition-colors hover:text-accent">
             Email
           </a>
+          <a href={site.linkedin} className="transition-colors hover:text-accent">
+            LinkedIn
+          </a>
         </p>
       </div>
     </footer>

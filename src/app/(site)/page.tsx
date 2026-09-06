@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site } from "@/lib/site";
 import { getLatestPosts, getLatestProjects } from "@/lib/blog";
 import { PostRow } from "@/components/post-row";
+import { ProjectRow } from "@/components/project-row";
 
 export default async function Home() {
   const posts = await getLatestPosts(3);
@@ -72,26 +73,7 @@ export default async function Home() {
           <ul className="divide-y divide-rule">
             {projects.map((project) => (
               <li key={project.slug}>
-                <Link
-                  href={`/work/${project.slug}`}
-                  aria-label={project.name}
-                  className="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6"
-                >
-                  <span className="shrink-0 font-mono text-[13px] text-muted sm:w-20">
-                    {project.year}
-                  </span>
-                  <span className="flex-1">
-                    <span className="block font-serif text-xl leading-snug decoration-accent decoration-2 underline-offset-4 group-hover:underline">
-                      {project.name}
-                    </span>
-                    <span className="mt-1 block text-[15px] leading-6 text-muted">
-                      {project.outcome}
-                    </span>
-                  </span>
-                  <span className="shrink-0 font-mono text-[13px] text-muted">
-                    {project.stack.join(" · ")}
-                  </span>
-                </Link>
+                <ProjectRow project={project} />
               </li>
             ))}
           </ul>
