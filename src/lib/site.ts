@@ -9,4 +9,5 @@ export const site = {
   email: "nat.thesratanavong@gmail.com",
   github: "https://github.com/Nat-Thesratanavong",
   rss: "/rss.xml",
+  linkedin: "https://www.linkedin.com/in/nat-thesratanavong-70666a322/",
 } as const;

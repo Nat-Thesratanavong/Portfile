@@ -2,7 +2,7 @@ import { site } from "@/lib/site";
 
 const socials = [
   { label: "GitHub", href: site.github },
-  { label: "LinkedIn", href: "https://www.linkedin.com/" },
+  { label: "LinkedIn", href: site.linkedin },
   { label: "Email", href: `mailto:${site.email}` },
   { label: "RSS", href: site.rss },
 ];

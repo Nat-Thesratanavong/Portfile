@@ -11,6 +11,12 @@ Use `pnpm` for all package operations; do not use npm, yarn, or bun.
 - `pnpm test` - run the unit and integration suites
 - `pnpm test:e2e` - run the E2E suite
 
+## Git Worktree Layout
+
+- Keep the repository root checkout on the local `main` branch only.
+- Work on feature branches from dedicated worktrees under `.worktrees/` (for example, `.worktrees/feat-pong`).
+- Before editing, verify the checkout with `git worktree list` and `git branch --show-current`.
+
 ## Code Map
 
 - `src` - application source

@@ -34,6 +34,7 @@ test("about page renders bio and contact links", async ({ page }) => {
     `mailto:${site.email}`,
   );
   await expect(main.getByRole("link", { name: "GitHub" })).toHaveAttribute("href", site.github);
+  await expect(main.getByRole("link", { name: "LinkedIn" })).toHaveAttribute("href", site.linkedin);
 });
 
 test("rss feed serves xml", async ({ request }) => {
