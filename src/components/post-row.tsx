@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Post } from "@/lib/blog";
+import { displayTags } from "@/lib/tags";
 
 export function PostRow({ post }: { post: Post }) {
   return (
@@ -15,7 +16,7 @@ export function PostRow({ post }: { post: Post }) {
         {post.title}
       </span>
       <span className="shrink-0 font-mono text-[13px] text-muted">
-        {post.tag} · {post.readingTime}
+        {displayTags(post.tags)} · {post.readingTime}
       </span>
     </Link>
   );

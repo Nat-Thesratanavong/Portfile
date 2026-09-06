@@ -5,7 +5,7 @@ export const Posts: CollectionConfig = {
   slug: "posts",
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "tag", "_status", "updatedAt"],
+    defaultColumns: ["title", "tags", "_status", "updatedAt"],
   },
   versions: {
     drafts: true,
@@ -51,9 +51,15 @@ export const Posts: CollectionConfig = {
       },
     },
     {
-      name: "tag",
-      type: "text",
+      name: "tags",
+      type: "relationship",
+      relationTo: "tags",
+      hasMany: true,
       required: true,
+      minRows: 1,
+      admin: {
+        description: "Project-mastered or free-form tags.",
+      },
     },
     {
       name: "readingTime",

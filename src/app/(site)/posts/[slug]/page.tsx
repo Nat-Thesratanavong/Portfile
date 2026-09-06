@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { site } from "@/lib/site";
 import { getPostBySlug, getPublishedSlugs } from "@/lib/blog";
+import { displayTags } from "@/lib/tags";
 
 type RichTextData = ComponentProps<typeof RichText>["data"];
 
@@ -26,7 +27,7 @@ export async function generateMetadata({
   }
   return {
     title: `${post.title} — ${site.name}`,
-    description: `${post.title} (${post.tag}, ${post.readingTime} read)`,
+    description: `${post.title} (${displayTags(post.tags, ", ")}, ${post.readingTime} read)`,
   };
 }
 
@@ -48,7 +49,7 @@ export default async function PostPage({
           {post.title}
         </h1>
         <p className="mt-3 font-mono text-[13px] text-muted">
-          {post.date} · {post.readingTime} · {post.tag}
+          {post.date} · {post.readingTime} · {displayTags(post.tags)}
         </p>
         <div className="mt-6 border-t border-rule" />
         {post.cover ? (
