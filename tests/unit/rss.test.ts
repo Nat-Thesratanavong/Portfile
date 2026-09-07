@@ -7,7 +7,7 @@ const post: Post = {
   title: "Fish & Chips <b>",
   date: "Jan 2025",
   readingTime: "6 min",
-  tag: "Next.js",
+  tags: ["Next.js"],
 };
 
 describe("escapeXml", () => {
@@ -29,6 +29,31 @@ describe("buildRss", () => {
     expect(xml).toContain("<title>Fish &amp; Chips &lt;b&gt;</title>");
     expect(xml).toContain("<link>https://example.com/posts/hello-world</link>");
     expect(xml).toContain("<category>Next.js</category>");
+  });
+
+  it("renders one category per tag for multi-tag posts", () => {
+    const xml = buildRss({
+      title: "Blog",
+      description: "Writing",
+      siteUrl: "https://example.com",
+      posts: [{ ...post, tags: ["Next.js", "React & Roll"] }],
+    });
+    expect(xml).toContain("<category>Next.js</category>");
+    expect(xml).toContain("<category>React &amp; Roll</category>");
+    expect(xml).toContain(
+      "<description>Next.js · React &amp; Roll · 6 min</description>",
+    );
+  });
+
+  it("omits categories and falls back to reading time when untagged", () => {
+    const xml = buildRss({
+      title: "Blog",
+      description: "Writing",
+      siteUrl: "https://example.com",
+      posts: [{ ...post, tags: [] }],
+    });
+    expect(xml).not.toContain("<category>");
+    expect(xml).toContain("<description>6 min</description>");
   });
 
   it("renders a valid channel with no items when empty", () => {

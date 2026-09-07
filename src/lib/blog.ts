@@ -1,5 +1,7 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { asString, isRecord } from "./guards";
+import { resolveTagLabels } from "./tags";
 
 export type Cover = {
   url: string;
@@ -18,7 +20,7 @@ export type Post = {
   title: string;
   date: string;
   readingTime: string;
-  tag: string;
+  tags: string[];
 };
 
 export type Project = {
@@ -29,14 +31,6 @@ export type Project = {
   year: string;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function asString(value: unknown): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
 function formatMonth(iso: string): string {
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) {
@@ -46,19 +40,25 @@ function formatMonth(iso: string): string {
   return `${month} ${parsed.getUTCFullYear()}`;
 }
 
-function toPost(doc: unknown): Post | null {
+async function toPost(
+  doc: unknown,
+  fetchTagById: (id: number | string) => Promise<unknown>,
+): Promise<Post | null> {
   if (!isRecord(doc) || doc._status !== "published") {
     return null;
   }
   const title = asString(doc.title);
   const slug = asString(doc.slug);
   const date = asString(doc.date);
-  const tag = asString(doc.tag);
   const readingTime = asString(doc.readingTime);
-  if (!title || !slug || !date || !tag || !readingTime) {
+  if (!title || !slug || !date || !readingTime) {
     return null;
   }
-  return { slug, title, date: formatMonth(date), readingTime, tag };
+  const tags = await resolveTagLabels(doc.tags, fetchTagById);
+  if (tags.length === 0) {
+    console.warn(`Post "${slug}" has no resolvable tags; showing it as Untagged.`);
+  }
+  return { slug, title, date: formatMonth(date), readingTime, tags };
 }
 
 function toProject(doc: unknown): Project | null {
@@ -92,15 +92,19 @@ async function publishedDocs(collection: "posts" | "projects", limit: number): P
     collection,
     sort: collection === "posts" ? "-date" : "-year",
     limit,
+    depth: 1,
   })) as unknown as { docs?: unknown };
   return Array.isArray(result.docs) ? result.docs : [];
 }
 
 export async function getLatestPosts(limit = 10): Promise<Post[]> {
+  const payload = await getPayload({ config });
   const docs = await publishedDocs("posts", limit);
+  const fetchTagById = (id: number | string): Promise<unknown> =>
+    payload.findByID({ collection: "tags", id, depth: 0 });
   const posts: Post[] = [];
   for (const doc of docs) {
-    const post = toPost(doc);
+    const post = await toPost(doc, fetchTagById);
     if (post) {
       posts.push(post);
     }
@@ -139,10 +143,13 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
     collection: "posts",
     where: { slug: { equals: slug } },
     limit: 1,
+    depth: 1,
   })) as unknown as { docs?: unknown };
   const docs = Array.isArray(result.docs) ? result.docs : [];
   const first = docs.length > 0 ? docs[0] : null;
-  const post = toPost(first);
+  const post = await toPost(first, (id) =>
+    payload.findByID({ collection: "tags", id, depth: 0 }),
+  );
   if (!post || !isRecord(first)) {
     return null;
   }
